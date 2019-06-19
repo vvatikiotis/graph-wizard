@@ -1,0 +1,22 @@
+{
+  "parser": "babel-eslint",
+  "env": {
+    "browser": true
+  },
+  "plugins": ["import", "react"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:import/errors",
+    "plugin:react/recommended"
+  ],
+  "rules": {
+    "no-unexpected-multiline": "error",
+    "no-unused-vars": "warn",
+    "react/display-name": "off"
+  },
+  "settings": {
+    "react": {
+      "version": "16.0"
+    }
+  }
+}

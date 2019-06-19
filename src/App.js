@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
 
 function Wizard({ initial, children }) {
   const [current, setCurrent] = useState(initial || 0);
@@ -28,13 +27,15 @@ function Step(props) {
 function App(props) {
   return (
     <Wizard initial={3}>
-      <Step id="one" title="one" />
-      <Step id="two" title="two" />
-      <Step id="three" title={3} />
-      <Step id="four" title={4} />
-      <Step id="five" title={5} />
+      <Step title="one" />
+      <Step title="two" />
+      <Step title={3} />
+      <Step title={4} />
+      <Step title={5} />
     </Wizard>
   );
 }
+
+Wizard.Step = Step;
 
 export default App;

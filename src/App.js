@@ -1,25 +1,39 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 
-function App() {
+function Wizard({ initial, children }) {
+  const [current, setCurrent] = useState(initial || 0);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <React.Fragment>
+      {children[current]}
+
+      {current > 0 && (
+        <button onClick={() => setCurrent(current > 0 ? current - 1 : current)}>
+          Back
+        </button>
+      )}
+
+      {current < React.Children.count(children) - 1 && (
+        <button onClick={() => setCurrent(current + 1)}>Next</button>
+      )}
+    </React.Fragment>
+  );
+}
+
+function Step(props) {
+  return <h2>Im {props.title}</h2>;
+}
+
+function App(props) {
+  return (
+    <Wizard initial={3}>
+      <Step id="one" title="one" />
+      <Step id="two" title="two" />
+      <Step id="three" title={3} />
+      <Step id="four" title={4} />
+      <Step id="five" title={5} />
+    </Wizard>
   );
 }
 

@@ -2,59 +2,101 @@ import React, { useState } from 'react';
 import { tsPropertySignature } from '@babel/types';
 
 function Wizard({ initial, children }) {
-  const [titleDescription] = useState(() => {
-    return React.Children.map(children, ({ props, type }) => {
-      const exclude = type === ProgressIndicator || type === Nav;
+  const _Step = children.find(({ type }) => type === Step);
+  const _Steps = children.find(({ type }) => type === Steps);
+  const _Nav = children.find(({ type }) => type === Nav);
+  const _Progress = children.find(({ type }) => type === ProgressIndicator);
 
-      return exclude
-        ? undefined
-        : { title: props.title, description: props.description };
-    });
+  if (_Step) throw new Error('Step must be inside Steps');
+
+  const [titleDescPairs] = useState(() => {
+    return _Steps.props.children.map(({ props: { title, description } }) => ({
+      title,
+      description,
+    }));
   });
 
   const [current, setCurrent] = useState(initial || 0);
 
+  const newChildren = React.Children.map(children, child => {
+    const newProps = {
+      current,
+      setCurrent,
+      count: React.Children.count(_Steps.props.children),
+      titleDescPairs,
+    };
+
+    return React.cloneElement(child, newProps);
+  });
+
   return (
     <React.Fragment>
-      {children[current]}
+      {newChildren}
 
+      <pre>{JSON.stringify(titleDescPairs[current], null, 2)}</pre>
+    </React.Fragment>
+  );
+}
+
+function Steps({ children, current }) {
+  return children[current];
+}
+
+function Step({ children }) {
+  return children || null;
+}
+
+function ProgressIndicator({ current, count, titleDescPairs }) {
+  return (
+    <div>
+      {titleDescPairs.map((pair, index) => {
+        return (
+          <span>
+            {index === current ? <strong>{pair.title}</strong> : pair.title}
+            {index < count - 1 && '--->'}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function Nav({ count, current, setCurrent, titleDescPairs }) {
+  return (
+    <div>
       {current > 0 && (
         <button onClick={() => setCurrent(current > 0 ? current - 1 : current)}>
           Back
         </button>
       )}
 
-      {current < React.Children.count(children) - 1 && (
+      {current < count - 1 && (
         <button onClick={() => setCurrent(current + 1)}>Next</button>
       )}
-
-      <pre>{JSON.stringify(titleDescription, null, 2)}</pre>
-    </React.Fragment>
+    </div>
   );
 }
 
-function Step({ title, description, children }) {
-  return children || null;
+function TabNav({ current, setCurrent, titleDescPairs }) {
+  return (
+    <div>
+      {titleDescPairs.map(({ title }, index) => (
+        <span>
+          <button onClick={() => setCurrent(index)}>{title}</button>
+        </span>
+      ))}
+    </div>
+  );
 }
-
-function ProgressIndicator(props) {
-  return 'Progress Indicator';
-}
-
-function Nav() {
-  return 'Buttons';
-}
-function View(props) {}
-function ProgressInidicator() {}
 
 function App(props) {
   const graph = {};
 
   return (
-    <Wizard initial={3}>
+    <Wizard initial={1}>
+      <TabNav />
       <ProgressIndicator />
-      <Nav />
-      <View>
+      <Steps>
         <Step />
         <Step title="two" description="Description">
           Iam a step
@@ -62,7 +104,7 @@ function App(props) {
         <Step title={3} />
         <Step title={4} />
         <Step title={5} />
-      </View>
+      </Steps>
     </Wizard>
   );
 }

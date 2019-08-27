@@ -40,18 +40,18 @@ function GraphWizard({ graph, children }) {
     service.onTransition(state => console.log(state.value));
   }, [service]);
 
-  const newChildren = React.Children.map(children, child => {
-    const newProps = {
+  const clonedChildren = React.Children.map(children, child => {
+    const extraProps = {
       current,
       send,
       service,
-      // titleDescPairs,
+      // titleDescPairs, // for ProgressIndicator
     };
 
-    return React.cloneElement(child, newProps);
+    return React.cloneElement(child, extraProps);
   });
 
-  return <React.Fragment>{newChildren}</React.Fragment>;
+  return <React.Fragment>{clonedChildren}</React.Fragment>;
 }
 
 function GraphNav({ current, send }) {
@@ -165,12 +165,36 @@ function Step({ children }) {
 }
 
 function App(props) {
-  const graph = {};
+  const [selectedOption, setSelected] = useState('step3');
 
   return (
-    <Wizard initial={1} graph={StateMachine}>
-      <GraphNav />
-      {/* <Steps>
+    <React.Fragment>
+      <div>Only used in graph wizard</div>
+      <label>
+        <input
+          type="radio"
+          name="decision"
+          value="step3"
+          checked={selectedOption === 'step3'}
+          onChange={evt => setSelected(evt.target.value)}
+        />
+        Step3
+      </label>
+      <label>
+        <input
+          type="radio"
+          name="decision"
+          value="step4"
+          checked={selectedOption === 'step4'}
+          onChange={evt => setSelected(evt.target.value)}
+        />
+        Step4
+      </label>
+      <hr />
+
+      <Wizard initial={1} graph={StateMachine}>
+        <GraphNav />
+        {/* <Steps>
         <Step />
         <Step title="two" description="Description">
           Iam a step
@@ -179,8 +203,9 @@ function App(props) {
         <Step title={4} />
         <Step title={5} />
       </Steps> */}
-      {/* <ProgressIndicator /> */}
-    </Wizard>
+        {/* <ProgressIndicator /> */}
+      </Wizard>
+    </React.Fragment>
   );
 }
 

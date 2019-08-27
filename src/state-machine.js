@@ -32,5 +32,14 @@ export default Machine({
         description: 'Step333 desc',
       },
     },
+    step4: {
+      on: {
+        PREV: 'step2',
+      },
+      meta: {
+        title: 'step444',
+        description: 'Step444 desc',
+      },
+    },
   },
 });

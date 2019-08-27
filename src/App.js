@@ -14,8 +14,8 @@ function Wizard({ tabs, graph, children, ...rest }) {
   if (tabs && graph) throw new Error('graphs and tabs are mutually exclusive');
   if (graph && !isMachine(graph))
     throw new Error('graph is not an xstate Machine');
-  if (graph && children.find(({ type }) => type === Steps))
-    throw new Error('You cannot have a graph and Steps');
+  // if (graph && children.find(({ type }) => type === Steps))
+  //   throw new Error('You cannot have a graph and Steps');
   if (graph && children.find(({ type }) => type === Step))
     throw new Error(
       'You cannot have a graph and Step. Also Step should be inside Steps'
@@ -45,6 +45,7 @@ function GraphWizard({ graph, children }) {
       current,
       send,
       service,
+      graph,
       // titleDescPairs, // for ProgressIndicator
     };
 
@@ -69,6 +70,8 @@ function GraphNav({ current, send }) {
     </div>
   );
 }
+
+// --------------------------
 
 function TabWizard(props) {
   return <LinearWizard {...props} />;
@@ -154,10 +157,13 @@ function Nav({ count, current, setCurrent, titleDescPairs }) {
   );
 }
 
-function Steps({ children, current, tabs }) {
-  if (tabs) console.warn('steps should be linear');
+function Steps({ current, graph, children }) {
+  // if graph ....
+  // maybe thius needs to split in separate graph and non-graph components
+  const [[id, meta]] = Object.entries(current.meta);
+  const { component: Comp } = meta;
 
-  return children[current];
+  return graph ? <Comp /> : children[current];
 }
 
 function Step({ children }) {
@@ -194,6 +200,7 @@ function App(props) {
 
       <Wizard initial={1} graph={StateMachine}>
         <GraphNav />
+        <Steps />
         {/* <Steps>
         <Step />
         <Step title="two" description="Description">

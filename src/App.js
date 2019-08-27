@@ -40,24 +40,32 @@ function GraphWizard({ graph, children }) {
     service.onTransition(state => console.log(state.value));
   }, [service]);
 
-  //   const newChildren = React.Children.map(children, child => {
-  //   const newProps = {
-  //     current,
-  //     send,
-  //     count: React.Children.count(_Steps.props.children),
-  //     titleDescPairs,
-  //   };
+  const newChildren = React.Children.map(children, child => {
+    const newProps = {
+      current,
+      send,
+      service,
+      // titleDescPairs,
+    };
 
-  //   return React.cloneElement(child, newProps);
-  return <React.Fragment>{children}</React.Fragment>;
+    return React.cloneElement(child, newProps);
+  });
+
+  return <React.Fragment>{newChildren}</React.Fragment>;
 }
 
-function GraphNav(props) {
+function GraphNav({ current, send }) {
+  const nextEvents = current.nextEvents;
+
   return (
     <div>
-      <button onClick={() => {}}>Back</button>
+      {nextEvents.includes('PREV') && (
+        <button onClick={() => send('PREV')}>Back</button>
+      )}
 
-      <button onClick={() => {}}>Next</button>
+      {nextEvents.includes('NEXT') && (
+        <button onClick={() => send('NEXT')}>Next</button>
+      )}
     </div>
   );
 }
@@ -115,16 +123,6 @@ function LinearWizard({ initial, children }) {
   );
 }
 
-function Steps({ children, current, tabs }) {
-  if (tabs) console.warn('steps should be linear');
-
-  return children[current];
-}
-
-function Step({ children }) {
-  return children || null;
-}
-
 function ProgressIndicator({ current, count, titleDescPairs = [] }) {
   return (
     <div>
@@ -154,6 +152,16 @@ function Nav({ count, current, setCurrent, titleDescPairs }) {
       )}
     </div>
   );
+}
+
+function Steps({ children, current, tabs }) {
+  if (tabs) console.warn('steps should be linear');
+
+  return children[current];
+}
+
+function Step({ children }) {
+  return children || null;
 }
 
 function App(props) {

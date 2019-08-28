@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { tsPropertySignature } from '@babel/types';
 import { useMachine } from '@xstate/react';
 import { isMachine } from 'xstate/es/utils';
-import StateMachine from './state-machine';
 
 function Wizard({ tabs, graph, children, ...rest }) {
   children = children
@@ -33,7 +32,7 @@ function Wizard({ tabs, graph, children, ...rest }) {
   else return <LinearWizard {...rest}>{children}</LinearWizard>;
 }
 
-function GraphWizard({ graph, children }) {
+export function GraphWizard({ graph, children, ...rest }) {
   const [current, send, service] = useMachine(graph);
 
   useEffect(() => {
@@ -46,6 +45,7 @@ function GraphWizard({ graph, children }) {
       send,
       service,
       graph,
+      ...rest,
       // titleDescPairs, // for ProgressIndicator
     };
 
@@ -55,17 +55,20 @@ function GraphWizard({ graph, children }) {
   return <React.Fragment>{clonedChildren}</React.Fragment>;
 }
 
-function GraphNav({ current, send }) {
+export function GraphNav({ current, send, selected }) {
   const nextEvents = current.nextEvents;
+  const hasPrev = nextEvents.find(ev => ev.startsWith('PREV'));
+  const hasNext = nextEvents.find(ev => ev.startsWith('NEXT'));
+  const allNext = nextEvents.filter(ev => ev.startsWith('NEXT'));
+
+  const nextEvent = allNext.find(ev => ev.endsWith(selected.toUpperCase()));
 
   return (
     <div>
-      {nextEvents.includes('PREV') && (
-        <button onClick={() => send('PREV')}>Back</button>
-      )}
+      {hasPrev && <button onClick={() => send(hasPrev)}>Previous</button>}
 
-      {nextEvents.includes('NEXT') && (
-        <button onClick={() => send('NEXT')}>Next</button>
+      {hasNext && (
+        <button onClick={() => send(nextEvent || hasNext)}>Next</button>
       )}
     </div>
   );
@@ -73,11 +76,11 @@ function GraphNav({ current, send }) {
 
 // --------------------------
 
-function TabWizard(props) {
+export function TabWizard(props) {
   return <LinearWizard {...props} />;
 }
 
-function TabNav({ current, setCurrent, titleDescPairs }) {
+export function TabNav({ current, setCurrent, titleDescPairs }) {
   return (
     <div>
       {titleDescPairs.map(({ title }, index) => (
@@ -89,7 +92,7 @@ function TabNav({ current, setCurrent, titleDescPairs }) {
   );
 }
 
-function LinearWizard({ initial, children }) {
+export function LinearWizard({ initial, children }) {
   const _Step = children.find(({ type }) => type === Step);
   const _Steps = children.find(({ type }) => type === Steps);
   // const _Nav = children.find(({ type }) => type === Nav);
@@ -126,7 +129,7 @@ function LinearWizard({ initial, children }) {
   );
 }
 
-function ProgressIndicator({ current, count, titleDescPairs = [] }) {
+export function ProgressIndicator({ current, count, titleDescPairs = [] }) {
   return (
     <div>
       {titleDescPairs.map(({ title, description }, index) => {
@@ -141,7 +144,7 @@ function ProgressIndicator({ current, count, titleDescPairs = [] }) {
   );
 }
 
-function Nav({ count, current, setCurrent, titleDescPairs }) {
+export function Nav({ count, current, setCurrent, titleDescPairs }) {
   return (
     <div>
       {current > 0 && (
@@ -157,65 +160,18 @@ function Nav({ count, current, setCurrent, titleDescPairs }) {
   );
 }
 
-function Steps({ current, graph, children }) {
+export function Steps({ current, graph, children }) {
   // if graph ....
   // maybe thius needs to split in separate graph and non-graph components
-  const [[id, meta]] = Object.entries(current.meta);
-  const { component: Comp } = meta;
-
-  return graph ? <Comp /> : children[current];
+  if (graph) {
+    const [[id, meta]] = Object.entries(current.meta);
+    const { component: Comp } = meta;
+    return <Comp />;
+  } else return children[current];
 }
 
-function Step({ children }) {
+export function Step({ children }) {
   return children || null;
 }
 
-function App(props) {
-  const [selectedOption, setSelected] = useState('step3');
-
-  return (
-    <React.Fragment>
-      <div>Only used in graph wizard</div>
-      <label>
-        <input
-          type="radio"
-          name="decision"
-          value="step3"
-          checked={selectedOption === 'step3'}
-          onChange={evt => setSelected(evt.target.value)}
-        />
-        Step3
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="decision"
-          value="step4"
-          checked={selectedOption === 'step4'}
-          onChange={evt => setSelected(evt.target.value)}
-        />
-        Step4
-      </label>
-      <hr />
-
-      <Wizard initial={1} graph={StateMachine}>
-        <GraphNav />
-        <Steps />
-        {/* <Steps>
-        <Step />
-        <Step title="two" description="Description">
-          Iam a step
-        </Step>
-        <Step title={3} />
-        <Step title={4} />
-        <Step title={5} />
-      </Steps> */}
-        {/* <ProgressIndicator /> */}
-      </Wizard>
-    </React.Fragment>
-  );
-}
-
-Wizard.Step = Step;
-
-export default App;
+export default Wizard;

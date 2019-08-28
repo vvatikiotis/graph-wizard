@@ -6,15 +6,15 @@ function Step1(props) {
 }
 
 function Step2(props) {
-  return <h4>Step2</h4>;
+  return <h4>Step22</h4>;
 }
 
-function Step3(props) {
-  return <h4>Step3</h4>;
+function Step3(props, onSelect) {
+  return <h4>Step333</h4>;
 }
 
 function Step4(props) {
-  return <h4>Step4</h4>;
+  return <h4>Step4444</h4>;
 }
 
 export default Machine({
@@ -33,7 +33,8 @@ export default Machine({
     },
     step2: {
       on: {
-        NEXT: 'step3',
+        NEXT_STEP3: 'step3',
+        NEXT_STEP4: 'step4',
         PREV: 'step1',
       },
       meta: {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { tsPropertySignature } from '@babel/types';
 import { useMachine } from '@xstate/react';
-import { isMachine } from 'xstate/es/utils';
+import { isMachine } from 'xstate/lib/utils';
 
 function Wizard({ tabs, graph, children, ...rest }) {
   children = children

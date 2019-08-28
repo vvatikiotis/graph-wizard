@@ -1,13 +1,15 @@
 {
   "parser": "babel-eslint",
   "env": {
-    "browser": true
+    "browser": true,
+    "jest/globals": true
   },
-  "plugins": ["import", "react"],
+  "plugins": ["import", "react", "jest"],
   "extends": [
     "eslint:recommended",
     "plugin:import/errors",
     "plugin:react/recommended"
+    // "plugin:jest/all"
   ],
   "rules": {
     "no-unexpected-multiline": "error",

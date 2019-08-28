@@ -1,6 +1,10 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, cleanup } from '@testing-library/react';
 import App from './App';
+
+afterEach(() => {
+  cleanup();
+});
 
 test('renders without crashing', () => {
   // const div = document.createElement('div');
@@ -8,3 +12,5 @@ test('renders without crashing', () => {
   // ReactDOM.unmountComponentAtNode(div);
   render(<App />);
 });
+
+test('testing', () => {});

@@ -9,7 +9,6 @@
     "eslint:recommended",
     "plugin:import/errors",
     "plugin:react/recommended"
-    // "plugin:jest/all"
   ],
   "rules": {
     "no-unexpected-multiline": "error",

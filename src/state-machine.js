@@ -2,19 +2,19 @@ import { Machine } from 'xstate';
 import React from 'react';
 
 function Step1(props) {
-  return <h4>Step1</h4>;
+  return <h4>Step1 View</h4>;
 }
 
 function Step2(props) {
-  return <h4>Step22</h4>;
+  return <h4>Step22 View</h4>;
 }
 
 function Step3(props, onSelect) {
-  return <h4>Step333</h4>;
+  return <h4>Step333 View</h4>;
 }
 
 function Step4(props) {
-  return <h4>Step4444</h4>;
+  return <h4>Step4444 View</h4>;
 }
 
 export default Machine({

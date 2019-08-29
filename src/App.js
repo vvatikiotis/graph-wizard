@@ -12,6 +12,23 @@ import StateMachine from './state-machine';
 function Step3Linear(props) {
   return <h3>Step3 Linear View</h3>;
 }
+
+function getPrevButtonProps() {
+  return {
+    disabled: true, // NOTE: can be a function....
+    text: 'Disabled prev',
+    onClick: () => console.log('prev'),
+  };
+}
+
+function getNextButtonProps() {
+  return {
+    disabled: false,
+    text: 'Disabled',
+    onClick: () => console.log('next'),
+  };
+}
+
 export default function App(props) {
   const [selectedOption, setSelected] = useState('step3');
 
@@ -55,7 +72,7 @@ export default function App(props) {
       {/* <Wizard initial={1} graph={StateMachine} selected={selectedOption}> */}
       <Wizard initial={1}>
         {/* <GraphNav /> */}
-        <Nav onNext={() => {}} onPrev={() => {}} />
+        <Nav next={getNextButtonProps()} prev={getPrevButtonProps()} />
         <Steps>
           <Step id="step1" title="Step1 title">
             {' '}

@@ -5,6 +5,14 @@ import PropTypes from 'prop-types';
 
 const { number, bool, object, func } = PropTypes;
 
+function callAll(...fns) {
+  return (...args) => fns.forEach(fn => fn && fn(...args));
+}
+
+function merge(o1, o2) {
+  return Object.assign(o1, o2);
+}
+
 const WizardContext = React.createContext({
   from: null,
   to: null,
@@ -157,13 +165,13 @@ export function LinearWizard({ initial, children }) {
   const newChildren = React.Children.map(children, child => {
     const newProps = {
       current,
-      previous: {
+      defaultPrev: {
         exists: current > 0,
         disabled: false,
         text: 'Previous',
         onClick: () => setCurrent(current > 0 ? current - 1 : current),
       },
-      next: {
+      defaultNext: {
         exists: current < count - 1,
         disabled: false,
         text: 'Next',
@@ -188,18 +196,27 @@ export function LinearWizard({ initial, children }) {
 //
 //
 //
-export function Nav({ previous, next }) {
+export function Nav({ defaultPrev, defaultNext, next, prev }) {
+  const finalPrev = Object.assign({}, defaultPrev, prev);
+  const finalNext = Object.assign({}, defaultNext, next);
+
   return (
     <div>
-      {previous.exists && (
-        <button disabled={previous.disabled} onClick={previous.onClick}>
-          {previous.text}
+      {finalPrev.exists && (
+        <button
+          disabled={finalPrev.disabled}
+          onClick={callAll(defaultPrev.onClick, next.onClick)}
+        >
+          {finalPrev.text}
         </button>
       )}
 
-      {next.exists && (
-        <button disabled={next.disabled} onClick={next.onClick}>
-          {next.text}
+      {finalNext.exists && (
+        <button
+          disabled={finalNext.disabled}
+          onClick={callAll(defaultNext.onClick, prev.onClick)}
+        >
+          {finalNext.text}
         </button>
       )}
     </div>

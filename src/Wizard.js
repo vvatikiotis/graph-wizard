@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { tsPropertySignature } from '@babel/types';
 import { useMachine } from '@xstate/react';
 import { isMachine } from 'xstate/lib/utils';
+import PropTypes from 'prop-types';
 
+const { number, bool, object, func } = PropTypes;
+
+const WizardContext = React.createContext({
+  from: null,
+  to: null,
+  goto: step => {},
+  next: () => {},
+});
+
+//
+//
+//
 function Wizard({ tabs, graph, children, ...rest }) {
   children = children
     ? React.Children.count(children) === 1
@@ -22,6 +34,11 @@ function Wizard({ tabs, graph, children, ...rest }) {
   if (graph && children.find(({ type }) => type === Nav))
     throw new Error('You cannot use Nav with graph. Use GraphNav instead');
 
+  if (!children.find(({ type }) => type === Steps))
+    throw new Error(
+      'You must use a `Steps` component to wrap your steps (which will render your views)'
+    );
+
   if (tabs) return <TabWizard {...rest}>{children}</TabWizard>;
   else if (graph)
     return (
@@ -32,6 +49,16 @@ function Wizard({ tabs, graph, children, ...rest }) {
   else return <LinearWizard {...rest}>{children}</LinearWizard>;
 }
 
+Wizard.propTypes = {
+  initial: number,
+  tabs: bool,
+  graph: object,
+  onTransition: func,
+};
+
+//
+//
+//
 export function GraphWizard({ graph, children, ...rest }) {
   const [current, send, service] = useMachine(graph);
 
@@ -55,6 +82,9 @@ export function GraphWizard({ graph, children, ...rest }) {
   return <React.Fragment>{clonedChildren}</React.Fragment>;
 }
 
+//
+//
+//
 export function GraphNav({ current, send, selected }) {
   const nextEvents = current.nextEvents;
   const hasPrev = nextEvents.find(ev => ev.startsWith('PREV'));
@@ -74,12 +104,18 @@ export function GraphNav({ current, send, selected }) {
   );
 }
 
-// --------------------------
+// -----------------------------------------------------------------------------
 
+//
+//
+//
 export function TabWizard(props) {
   return <LinearWizard {...props} />;
 }
 
+//
+//
+//
 export function TabNav({ current, setCurrent, titleDescPairs }) {
   return (
     <div>
@@ -92,6 +128,11 @@ export function TabNav({ current, setCurrent, titleDescPairs }) {
   );
 }
 
+// -----------------------------------------------------------------------------
+
+//
+//
+//
 export function LinearWizard({ initial, children }) {
   const _Step = children.find(({ type }) => type === Step);
   const _Steps = children.find(({ type }) => type === Steps);
@@ -102,19 +143,34 @@ export function LinearWizard({ initial, children }) {
 
   const [current, setCurrent] = useState(initial || 0);
 
-  const [titleDescPairs] = useState(() => {
-    return _Steps.props.children.map(({ props: { title, description } }) => ({
-      title,
-      description,
-    }));
+  const [steps] = useState(() => {
+    return _Steps.props.children.map(
+      ({ props: { id, title, description } }) => ({
+        id,
+        title,
+        description,
+      })
+    );
   });
 
+  const count = React.Children.count(_Steps.props.children);
   const newChildren = React.Children.map(children, child => {
     const newProps = {
       current,
-      setCurrent,
-      count: React.Children.count(_Steps.props.children),
-      titleDescPairs,
+      previous: {
+        exists: current > 0,
+        disabled: false,
+        text: 'Previous',
+        onClick: () => setCurrent(current > 0 ? current - 1 : current),
+      },
+      next: {
+        exists: current < count - 1,
+        disabled: false,
+        text: 'Next',
+        onClick: () => setCurrent(current + 1),
+      },
+      count,
+      steps,
     };
 
     return React.cloneElement(child, newProps);
@@ -124,15 +180,39 @@ export function LinearWizard({ initial, children }) {
     <React.Fragment>
       {newChildren}
 
-      <pre>{JSON.stringify(titleDescPairs[current], null, 2)}</pre>
+      <pre>{JSON.stringify(steps[current], null, 2)}</pre>
     </React.Fragment>
   );
 }
 
-export function ProgressIndicator({ current, count, titleDescPairs = [] }) {
+//
+//
+//
+export function Nav({ previous, next }) {
   return (
     <div>
-      {titleDescPairs.map(({ title, description }, index) => {
+      {previous.exists && (
+        <button disabled={previous.disabled} onClick={previous.onClick}>
+          {previous.text}
+        </button>
+      )}
+
+      {next.exists && (
+        <button disabled={next.disabled} onClick={next.onClick}>
+          {next.text}
+        </button>
+      )}
+    </div>
+  );
+}
+
+//
+//
+//
+export function ProgressIndicator({ current, count, steps = [] }) {
+  return (
+    <div>
+      {steps.map(({ title, description }, index) => {
         return (
           <span key={`${title}-${description}-${index}`}>
             {index === current ? <strong>{title}</strong> : title}
@@ -144,22 +224,11 @@ export function ProgressIndicator({ current, count, titleDescPairs = [] }) {
   );
 }
 
-export function Nav({ count, current, setCurrent, titleDescPairs }) {
-  return (
-    <div>
-      {current > 0 && (
-        <button onClick={() => setCurrent(current > 0 ? current - 1 : current)}>
-          Back
-        </button>
-      )}
+// -----------------------------------------------------------------------------
 
-      {current < count - 1 && (
-        <button onClick={() => setCurrent(current + 1)}>Next</button>
-      )}
-    </div>
-  );
-}
-
+//
+//
+//
 export function Steps({ current, graph, children }) {
   // if graph ....
   // maybe thius needs to split in separate graph and non-graph components

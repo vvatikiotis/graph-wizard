@@ -15,7 +15,7 @@ function Step3Linear(props) {
 
 function getPrevButtonProps() {
   return {
-    disabled: true, // NOTE: can be a function....
+    disabled: false, // NOTE: can be a function....
     text: 'Disabled prev',
     onClick: () => console.log('prev'),
   };
@@ -24,7 +24,7 @@ function getPrevButtonProps() {
 function getNextButtonProps() {
   return {
     disabled: false,
-    text: 'Disabled',
+    text: 'Disabled next',
     onClick: () => console.log('next'),
   };
 }
@@ -70,7 +70,7 @@ export default function App(props) {
       What if etc etc
       */}
       {/* <Wizard initial={1} graph={StateMachine} selected={selectedOption}> */}
-      <Wizard initial={1}>
+      <Wizard initial={'step3'}>
         {/* <GraphNav /> */}
         <Nav next={getNextButtonProps()} prev={getPrevButtonProps()} />
         <Steps>

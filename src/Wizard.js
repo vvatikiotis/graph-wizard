@@ -149,12 +149,22 @@ export function LinearWizard({ initial, children }) {
 
   if (_Step) throw new Error('Step must be inside Steps');
 
-  const [current, setCurrent] = useState(initial || 0);
+  const [current, setCurrent] = useState(() => {
+    const initialIndex = _Steps.props.children.findIndex(
+      child => child.props.id === initial
+    );
+
+    if (typeof initial === 'string') {
+      if (initialIndex === -1)
+        throw new Error(`No initial step with id ${initial}`);
+      else return initialIndex;
+    } else return initialIndex;
+  });
 
   const [steps] = useState(() => {
     return _Steps.props.children.map(
-      ({ props: { id, title, description } }) => ({
-        id,
+      ({ props: { id, title, description } }, index) => ({
+        id: id || index,
         title,
         description,
       })
@@ -199,7 +209,7 @@ export function LinearWizard({ initial, children }) {
 export function Nav({ defaultPrev, defaultNext, next, prev }) {
   const finalPrev = Object.assign({}, defaultPrev, prev);
   const finalNext = Object.assign({}, defaultNext, next);
-
+  console.log('+++', finalPrev, finalNext);
   return (
     <div>
       {finalPrev.exists && (
